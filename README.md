@@ -41,6 +41,22 @@ specific memcached server like this:
 
 for example.
 
+## Installation
+
+ 1. Create the `/etc/memcached` directory.
+ 
+ 2. Clone the repo 
+    
+        git clone git://github.com/perusio/memcached-better-init-script.git
+        
+ 3. Move your memcached configuration file(s) to `/etc/memcached`. 
+ 
+ 4. Copy this script to `/etc/init.d`.
+ 
+ 5. Issue `service memcached force-reload`
+ 
+ 6. Done.
+
 ## Credits
 
 The original init script is part of the debian testing distribution
