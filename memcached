@@ -12,8 +12,8 @@
 ### END INIT INFO
 
 # Usage:
-# cp /etc/memcached.conf /etc/memcached_server1.conf
-# cp /etc/memcached.conf /etc/memcached_server2.conf
+# cp /etc/memcached/memcached.conf /etc/memcached/memcached_server1.conf
+# cp /etc/memcached/memcached.conf /etc/memcached/memcached_server2.conf
 # start all instances:
 # /etc/init.d/memcached start
 # start one instance:
@@ -29,6 +29,7 @@ DAEMON=/usr/bin/memcached
 DAEMONNAME=memcached
 DAEMONBOOTSTRAP=/usr/share/memcached/scripts/start-memcached
 DESC=memcached
+CONFDIR=/etc/memcached
 
 test -x $DAEMON || exit 0
 test -x $DAEMONBOOTSTRAP || exit 0
@@ -42,87 +43,87 @@ ENABLE_MEMCACHED=no
 test -r /etc/default/memcached && . /etc/default/memcached
 
 
-FILES=(/etc/memcached_*.conf)
+FILES=($CONFDIR/memcached_*.conf)
 # check for alternative config schema
 if [ -r "${FILES[0]}" ]; then
-  CONFIGS=()
-  for FILE in "${FILES[@]}";
-  do
+    CONFIGS=()
+    for FILE in "${FILES[@]}";
+    do
     # remove prefix
-    NAME=${FILE#/etc/}
+        NAME=${FILE#/etc/}
     # remove suffix
-    NAME=${NAME%.conf}
+        NAME=${NAME%.conf}
 
     # check optional second param
-    if [ $# -ne 2 ];
-    then
+        if [ $# -ne 2 ];
+        then
       # add to config array
-      CONFIGS+=($NAME)
-    elif [ "memcached_$2" == "$NAME" ];
-    then
+            CONFIGS+=($NAME)
+        elif [ "memcached_$2" == "$NAME" ];
+        then
       # use only one memcached
-      CONFIGS=($NAME)
-      break;
-    fi;
-  done;
+            CONFIGS=($NAME)
+            break;
+        fi;
+    done;
 
-  if [ ${#CONFIGS[@]} == 0 ];
-  then
-    echo "Config not exist for: $2" >&2
-    exit 1
-  fi;
+    if [ ${#CONFIGS[@]} == 0 ];
+    then
+        echo "Config not exist for: $2" >&2
+        exit 1
+    fi;
 else
-  CONFIGS=(memcached)
+    CONFIGS=(memcached)
 fi;
 
 CONFIG_NUM=${#CONFIGS[@]}
 for ((i=0; i < $CONFIG_NUM; i++)); do
-  NAME=${CONFIGS[${i}]}
-  PIDFILE="/var/run/${NAME}.pid"
+    NAME=${CONFIGS[${i}]}
+    PIDFILE="/var/run/${NAME}.pid"
 
-case "$1" in
-  start)
-       echo -n "Starting $DESC: "
-       if [ $ENABLE_MEMCACHED = yes ]; then
-            start-stop-daemon --start --quiet --exec "$DAEMONBOOTSTRAP" -- /etc/${NAME}.conf $PIDFILE
+    case "$1" in
+        start)
+            echo -n "Starting $DESC: "
+            if [ $ENABLE_MEMCACHED = yes ]; then
+                start-stop-daemon --start --quiet --exec "$DAEMONBOOTSTRAP" -- ${CONFDIR}/${NAME}.conf $PIDFILE
+                echo "$NAME."
+            else
+                echo "$NAME disabled in /etc/default/memcached."
+            fi
+            ;;
+        stop)
+            echo -n "Stopping $DESC: "
+            start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE --exec $DAEMON
             echo "$NAME."
-       else
-            echo "$NAME disabled in /etc/default/memcached."
-       fi
-       ;;
-  stop)
-       echo -n "Stopping $DESC: "
-       start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE --exec $DAEMON
-       echo "$NAME."
-       rm -f $PIDFILE
-       ;;
+            rm -f $PIDFILE
+            ;;
 
-  restart|force-reload)
+        restart|force-reload)
        #
        #       If the "reload" option is implemented, move the "force-reload"
        #       option to the "reload" entry above. If not, "force-reload" is
        #       just the same as "restart".
        #
-       echo -n "Restarting $DESC: "
-       start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
-       rm -f $PIDFILE
-       if [ $ENABLE_MEMCACHED = yes ]; then
-       		sleep 1
-       		start-stop-daemon --start --quiet --exec "$DAEMONBOOTSTRAP" -- /etc/${NAME}.conf $PIDFILE
-       		echo "$NAME."
-       else
-            echo "$NAME disabled in /etc/default/memcached."
-       fi
-       ;;
-  status)
-       status_of_proc -p $PIDFILE $DAEMON $NAME  && exit 0 || exit $?
-       ;;
-  *)
-	N=/etc/init.d/$NAME
-	echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
-	exit 1
-	;;
-esac
+            echo -n "Restarting $DESC: "
+            start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
+            rm -f $PIDFILE
+            if [ $ENABLE_MEMCACHED = yes ]; then
+                sleep 1
+                start-stop-daemon --start --quiet --exec "$DAEMONBOOTSTRAP" -- ${CONFDIR}/${NAME}.conf $PIDFILE
+                echo "$NAME."
+            else
+                echo "$NAME disabled in /etc/default/memcached."
+            fi
+            ;;
+        status)
+            status_of_proc -p $PIDFILE $DAEMON $NAME  && exit 0 || exit $?
+            ;;
+        *)
+            N=/etc/init.d/$NAME
+            echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
+            exit 1
+            ;;
+    esac
 done;
 
 exit 0
