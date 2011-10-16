@@ -50,7 +50,8 @@ if [ -r "${FILES[0]}" ]; then
     for FILE in "${FILES[@]}";
     do
     # remove prefix
-        NAME=${FILE#/etc/}
+        NAME=${FILE#/etc/memcached/}
+
     # remove suffix
         NAME=${NAME%.conf}
 
@@ -66,7 +67,6 @@ if [ -r "${FILES[0]}" ]; then
             break;
         fi;
     done;
-
     if [ ${#CONFIGS[@]} == 0 ];
     then
         echo "Config not exist for: $2" >&2
@@ -99,11 +99,11 @@ for ((i=0; i < $CONFIG_NUM; i++)); do
             ;;
 
         restart|force-reload)
-       #
-       #       If the "reload" option is implemented, move the "force-reload"
-       #       option to the "reload" entry above. If not, "force-reload" is
-       #       just the same as "restart".
-       #
+        #
+        #       If the "reload" option is implemented, move the "force-reload"
+        #       option to the "reload" entry above. If not, "force-reload" is
+        #       just the same as "restart".
+        #
             echo -n "Restarting $DESC: "
             start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
             rm -f $PIDFILE
@@ -116,7 +116,7 @@ for ((i=0; i < $CONFIG_NUM; i++)); do
             fi
             ;;
         status)
-            status_of_proc -p $PIDFILE $DAEMON $NAME  && exit 0 || exit $?
+            status_of_proc -p $PIDFILE $DAEMON $CONFDIR/$NAME  && exit 0 || exit $?
             ;;
         *)
             N=/etc/init.d/$NAME

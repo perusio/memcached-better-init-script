@@ -13,12 +13,12 @@ it's now restricted to a specific subdirectory of `/etc`.
 Now it's easy to implement a multiserver setup. Just copy each file to
 a file named:
     
-    /etc/memcached_server1
-    /etc/memcached_server2
+    /etc/memcached_server1.conf
+    /etc/memcached_server2.conf
             .
             .
             .
-    /etc/memcached_serverN
+    /etc/memcached_serverN.conf
    
 Now you can either start/stop/restart all of your servers with a
 single command like, for example:
@@ -37,7 +37,7 @@ works caching [drupal](http://drupal.org) menus. Providing a service
 before provided by the `cache_menu` database table. You could name the
 specific memcached server like this:
 
-    memcached_server_cache_menu
+    memcached_server_cache_menu.conf
 
 for example.
 
