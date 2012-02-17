@@ -41,7 +41,7 @@ specific memcached server like this:
 
 for example.
 
-## Installation
+## Installation alongside the Debian Wheezy Memcached package
 
  1. Create the `/etc/memcached` directory.
  
@@ -56,6 +56,19 @@ for example.
  5. Issue `service memcached force-reload`
  
  6. Done.
+
+## For installations alongside the Debian Squeeze Memcached package you'll need to edit another file
+
+    /usr/share/memcached/scripts/start-memcached
+    
+    Around line 27, once the $pidfile variable has been initially set you'll need to implement the below 4 lines
+    
+    if (scalar(@ARGV) == 2) {
+        $etcfile = shift(@ARGV);
+        $pidfile = shift(@ARGV);
+    }
+
+
 
 ## Credits
 
